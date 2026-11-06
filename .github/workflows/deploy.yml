@@ -1,0 +1,98 @@
+name: Test and deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: recipe-app-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  backend-tests:
+    name: Test backend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Run backend API tests
+        run: npm test
+        working-directory: backend
+
+  frontend-tests:
+    name: Test frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Run frontend component tests
+        run: npm test
+        working-directory: frontend
+
+  build-and-deploy:
+    name: Build images and deploy to Cloud Run
+    needs:
+      - backend-tests
+      - frontend-tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Build and deploy backend
+        run: >-
+          gcloud builds submit
+          --project="${{ secrets.GCP_PROJECT_ID }}"
+          --config=cloudbuild-backend.yaml
+          .
+
+      - name: Build and deploy frontend
+        run: >-
+          gcloud builds submit
+          --project="${{ secrets.GCP_PROJECT_ID }}"
+          --config=cloudbuild-frontend.yaml
+          .
