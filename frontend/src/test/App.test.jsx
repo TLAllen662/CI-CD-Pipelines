@@ -1,5 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import App from '../App.jsx'
 
 const initialRecipe = {
@@ -31,7 +30,6 @@ test('loads and displays recipes', async () => {
 })
 
 test('submits a new recipe and refreshes the list', async () => {
-  const user = userEvent.setup()
   const addedRecipe = { ...initialRecipe, id: 2, name: 'Pasta' }
   const fetchMock = vi
     .fn()
@@ -43,23 +41,22 @@ test('submits a new recipe and refreshes the list', async () => {
   render(<App />)
 
   await screen.findByText(/No recipes yet/)
-  await user.type(screen.getByPlaceholderText('Recipe Name'), 'Pasta')
-  await user.type(
-    screen.getByPlaceholderText('Cook Time (e.g., 30 minutes)'),
-    '20 minutes'
-  )
-  await user.type(
-    screen.getByPlaceholderText('Ingredients (one per line)'),
-    'Pasta\nTomatoes'
-  )
-  await user.type(
-    screen.getByPlaceholderText('Cooking Instructions'),
-    'Boil and serve.'
-  )
-  await user.click(screen.getByRole('button', { name: 'Add Recipe' }))
+  fireEvent.change(screen.getByPlaceholderText('Recipe Name'), {
+    target: { value: 'Pasta' },
+  })
+  fireEvent.change(screen.getByPlaceholderText('Cook Time (e.g., 30 minutes)'), {
+    target: { value: '20 minutes' },
+  })
+  fireEvent.change(screen.getByPlaceholderText('Ingredients (one per line)'), {
+    target: { value: 'Pasta\nTomatoes' },
+  })
+  fireEvent.change(screen.getByPlaceholderText('Cooking Instructions'), {
+    target: { value: 'Boil and serve.' },
+  })
 
-  await waitFor(() => {
-    expect(fetchMock).toHaveBeenCalledTimes(3)
+  await act(async () => {
+    fireEvent.click(screen.getByRole('button', { name: 'Add Recipe' }))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(3))
   })
   expect(await screen.findByRole('heading', { name: 'Pasta' })).toBeInTheDocument()
   expect(fetchMock.mock.calls[1][1]).toMatchObject({
