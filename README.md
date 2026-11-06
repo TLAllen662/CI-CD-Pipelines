@@ -72,15 +72,14 @@ and deploy the services to Cloud Run.
 
 ### Failed-test deployment gate demonstration
 
-The backend suite contains a deliberately failing test named
-`intentional CI deployment gate demonstration`. Its failure makes the backend
-test job fail. Because the build-and-deploy job depends on both test jobs, GitHub
-Actions skips it, so neither Cloud Build configuration is submitted and the
-existing Cloud Run deployment is not changed by that workflow run.
+In [the demonstration run](https://github.com/TLAllen662/CI-CD-Pipelines/actions/runs/42270085872),
+an intentionally failing backend test caused the backend test job to fail. The
+build-and-deploy job depends on both test jobs, so GitHub Actions skipped it:
+neither Cloud Build configuration was submitted, and that run did not change
+the Cloud Run deployment. The deliberate failure has since been removed.
 
-Remove the demonstration test after capturing the failed run to restore the
-normal test suite. A successful test run alone does not ensure a successful
-deployment: Google Cloud authentication and permissions must also be configured.
+A successful test run alone does not ensure a successful deployment: Google
+Cloud authentication and permissions must also be configured.
 
 ## Project Structure
 ```bash
