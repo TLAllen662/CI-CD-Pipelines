@@ -70,6 +70,18 @@ The service account must be permitted to submit Cloud Build jobs. The Cloud
 Build service account must also have the permissions needed to push the images
 and deploy the services to Cloud Run.
 
+### Failed-test deployment gate demonstration
+
+The backend suite contains a deliberately failing test named
+`intentional CI deployment gate demonstration`. Its failure makes the backend
+test job fail. Because the build-and-deploy job depends on both test jobs, GitHub
+Actions skips it, so neither Cloud Build configuration is submitted and the
+existing Cloud Run deployment is not changed by that workflow run.
+
+Remove the demonstration test after capturing the failed run to restore the
+normal test suite. A successful test run alone does not ensure a successful
+deployment: Google Cloud authentication and permissions must also be configured.
+
 ## Project Structure
 ```bash
 recipe-app/

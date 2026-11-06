@@ -137,3 +137,7 @@ test('GET /api/health reports a healthy status', async () => {
   assert.equal(response.body.status, 'healthy');
   assert.ok(response.body.timestamp);
 });
+
+test('intentional CI deployment gate demonstration', () => {
+  assert.fail('Intentional failure: verify that CI skips deployment');
+});
