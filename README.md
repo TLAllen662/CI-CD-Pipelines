@@ -50,6 +50,20 @@ Frontend will run on `http://localhost:3000` (or the next available port).
 - `DELETE /api/recipes/:id` - Delete recipe
 - `GET /api/health` - Health check
 
+## Database Configuration
+
+The backend now supports two database modes:
+
+- **SQLite (default)** for local development and automated tests.
+- **PostgreSQL** when cloud/database environment variables are provided.
+
+To use PostgreSQL, set either:
+
+- `DATABASE_URL`, or
+- `DB_CLIENT=postgres` with `PGHOST`, `PGPORT`, `PGDATABASE`, `PGUSER`, and `PGPASSWORD`.
+
+If `DATABASE_PATH` is set, SQLite is used even when PostgreSQL variables are present.
+
 ## GitHub Actions Deployment
 
 The workflow in `.github/workflows/deploy.yml` runs the backend and frontend
@@ -65,10 +79,14 @@ Configure these repository secrets before running the deployment:
   Identity Federation provider authorized for this GitHub repository.
 - `GCP_SERVICE_ACCOUNT` - the email address of the deployment service account
   trusted by that provider.
+- `CLOUDSQL_APP_PASSWORD` - the PostgreSQL password for the Cloud SQL app user
+  (used during backend deployment as `PGPASSWORD`).
 
 The service account must be permitted to submit Cloud Build jobs. The Cloud
 Build service account must also have the permissions needed to push the images
-and deploy the services to Cloud Run.
+and deploy the services to Cloud Run. For the backend deployment, the Cloud Run
+runtime service account also needs `roles/cloudsql.client` to connect through
+the Cloud SQL connector.
 
 ### Failed-test deployment gate demonstration
 

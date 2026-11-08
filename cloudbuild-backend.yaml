@@ -15,6 +15,8 @@ steps:
         '--image', 'gcr.io/$PROJECT_ID/recipe-backend',
         '--platform', 'managed',
         '--region', 'us-central1',
+        '--add-cloudsql-instances', '$_CLOUDSQL_CONNECTION_NAME',
+        '--set-env-vars', 'DB_CLIENT=postgres,PGHOST=/cloudsql/$_CLOUDSQL_CONNECTION_NAME,PGPORT=5432,PGDATABASE=$_PGDATABASE,PGUSER=$_PGUSER,PGPASSWORD=$_PGPASSWORD',
         '--allow-unauthenticated',
         '--port', '5000'
       ]
@@ -22,3 +24,9 @@ steps:
 # Add logging configuration
 options:
   logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  _CLOUDSQL_CONNECTION_NAME: 'deployingtothecloud:us-central1:recipe-postgres'
+  _PGDATABASE: 'recipe_app'
+  _PGUSER: 'recipe_app_user'
+  _PGPASSWORD: ''

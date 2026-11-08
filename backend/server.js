@@ -47,7 +47,7 @@ app.post('/api/recipes', (req, res) => {
   }
 
   db.run(
-    "INSERT INTO recipes (name, ingredients, instructions, cookTime) VALUES (?, ?, ?, ?)",
+    'INSERT INTO recipes (name, ingredients, instructions, "cookTime") VALUES (?, ?, ?, ?)',
     [name, ingredients, instructions, cookTime],
     function(err) {
       if (err) {

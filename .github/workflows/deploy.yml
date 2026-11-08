@@ -88,6 +88,7 @@ jobs:
           gcloud builds submit
           --project="${{ secrets.GCP_PROJECT_ID }}"
           --config=cloudbuild-backend.yaml
+          --substitutions="_PGPASSWORD=${{ secrets.CLOUDSQL_APP_PASSWORD }}"
           .
 
       - name: Build and deploy frontend
